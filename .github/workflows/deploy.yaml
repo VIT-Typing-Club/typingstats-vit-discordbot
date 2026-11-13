@@ -41,5 +41,5 @@ jobs:
       - name: Verify deployment
         run: |
           sleep 3
-          sudo systemctl is-active --quiet typingclub-discordbot
+          sudo systemctl is-active typingclub-discordbot
           echo "Discord bot deployed!"
