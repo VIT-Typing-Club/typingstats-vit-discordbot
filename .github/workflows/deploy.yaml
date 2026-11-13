@@ -1,0 +1,45 @@
+name: Deploy Discord Bot
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Prepare deployment directory
+        run: |
+          mkdir -p /srv/typingclub-discordbot
+
+      - name: Deploy application files
+        run: |
+          rsync -av --delete \
+            --exclude='.env' \
+            --exclude='.venv/' \
+            --exclude='storage/state.json' \
+            --exclude='.git/' \
+            ./ /srv/typingclub-discordbot/
+
+      - name: Install dependencies
+        run: |
+          cd /srv/typingclub-discordbot
+
+          python3 -m venv .venv
+
+          .venv/bin/pip install -r requirements.txt
+
+      - name: Restart Discord Bot
+        run: |
+          sudo systemctl restart typingclub-discordbot
+
+      - name: Verify deployment
+        run: |
+          sleep 3
+          sudo systemctl is-active --quiet typingclub-discordbot
+          echo "Discord bot deployed!"
